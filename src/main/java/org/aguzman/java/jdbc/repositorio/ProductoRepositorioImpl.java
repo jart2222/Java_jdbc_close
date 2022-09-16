@@ -18,7 +18,8 @@ public class ProductoRepositorioImpl implements Repositorio<Producto>{
     @Override
     public List<Producto> listar() {
         List<Producto>productos=new ArrayList<>();
-        try(Statement stmt=getConnection().createStatement();
+        try(Connection conn=getConnection();
+            Statement stmt=conn.createStatement();
             ResultSet rs=stmt.executeQuery("SELECT p.*, c.nombre as categoria FROM productos as p \n" +
                     "inner join categorias as c on (p.categoria_id=c.id)")) {
             while (rs.next()){
@@ -34,7 +35,8 @@ public class ProductoRepositorioImpl implements Repositorio<Producto>{
     @Override
     public Producto porId(Long id) {
         Producto producto=null;
-        try(PreparedStatement stmt= getConnection().
+        try(Connection conn=getConnection();
+            PreparedStatement stmt= conn.
                 prepareStatement("SELECT p.*, c.nombre as categoria FROM productos as p \n" +
                         "inner join categorias as c on (p.categoria_id=c.id) where p.id =?")) {
             stmt.setLong(1,id);
@@ -57,7 +59,8 @@ public class ProductoRepositorioImpl implements Repositorio<Producto>{
         }else {
             sql = "INSERT INTO productos(nombre, precio, categoria_id, fecha_registro) VALUES (?,?,?,?)";
         }
-        try(PreparedStatement stmt= getConnection().prepareStatement(sql)) {
+        try(Connection conn=getConnection();
+            PreparedStatement stmt= conn.prepareStatement(sql)) {
             stmt.setString(1,producto.getNombre());
             stmt.setLong(2,producto.getPrecio());
             stmt.setLong(3,producto.getCategoria().getId());
@@ -77,7 +80,8 @@ public class ProductoRepositorioImpl implements Repositorio<Producto>{
 
     @Override
     public void eliminar(Long id) {
-        try (PreparedStatement stmt= getConnection().prepareStatement("DELETE FROM productos WHERE id=?")){
+        try (Connection conn=getConnection();
+             PreparedStatement stmt= conn.prepareStatement("DELETE FROM productos WHERE id=?")){
             stmt.setLong(1,id);
             stmt.executeUpdate();
         } catch (SQLException e) {
